@@ -1,0 +1,63 @@
+{
+  "name": "pman-sv",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/pman-sv/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/packages/pman-sv",
+        "main": "packages/pman-sv/src/main.ts",
+        "tsConfig": "packages/pman-sv/tsconfig.app.json",
+        "assets": ["packages/pman-sv/src/assets"]
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "packages/pman-sv/src/environments/environment.ts",
+              "with": "packages/pman-sv/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "pretty": {
+      "command":"npx nx serve | pino-pretty"
+    },
+    "serve": {      
+      "executor": "@nrwl/js:node",
+      "options": {
+        "buildTarget": "pman-sv:build"
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "pman-sv:build:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/pman-sv/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/pman-sv/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}
