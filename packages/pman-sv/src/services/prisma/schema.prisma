@@ -1,0 +1,116 @@
+// We want to connect to the MongoDB datasource
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  email String @unique
+  name  String @unique
+}
+
+model Doc {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  name      String   @unique
+  filePath  String   @unique
+  type      String
+
+  // parts     DocsOnParts[]
+  // packages  DocsOnPackages[]
+
+  partID String @db.ObjectId
+  part   Part   @relation(fields: [partID], references: [id])
+
+  packageID String  @db.ObjectId
+  package   Package @relation(fields: [packageID], references: [id])
+}
+
+model Package {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  name      String   @unique
+
+  // docs      DocsOnPackages[]
+  // parts     PackageToParts[]
+
+  partIDs String[] @db.ObjectId
+  parts   Part[]   @relation(fields: [partIDs], references: [id])
+
+  // docIDs String[] @db.ObjectId
+  //  @relation(fields: [docIDs], references: [id])
+  docs Doc[]
+}
+
+// model DocsOnPackages {
+//   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+//   createdAt DateTime @default(now())
+//   doc       Doc      @relation(fields: [docId], references: [id])
+//   docId     String   @db.ObjectId
+//   package   Package  @relation(fields: [packageId], references: [id])
+//   packageId String   @db.ObjectId
+// }
+
+model Tag {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  name      String   @unique
+
+  // parts TagsOnParts[]
+
+  partIDs String[] @db.ObjectId
+  parts   Part[]   @relation(fields: [partIDs], references: [id])
+}
+
+model Part {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  name      String   @unique
+  desc      String
+  location  Int?
+
+  tagIDs String[] @db.ObjectId
+  tags   Tag[]    @relation(fields: [tagIDs], references: [id])
+
+  // docIDs String[] @db.ObjectId
+  //Doc[]    @relation(fields: [docIDs], references: [id])
+  docs Doc[]
+
+  packageIDs String[]  @db.ObjectId
+  packages   Package[] @relation(fields: [packageIDs], references: [id])
+  // tags     TagsOnParts[]
+  // docs     DocsOnParts[]
+  // packages PackageToParts[]
+}
+
+// model TagsOnParts {
+//   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+//   createdAt DateTime @default(now())
+//   tag       Tag      @relation(fields: [tagId], references: [id])
+//   tagId     String   @db.ObjectId
+//   part      Part     @relation(fields: [partId], references: [id])
+//   partId    String   @db.ObjectId
+// }
+
+// model PackageToParts {
+//   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+//   createdAt DateTime @default(now())
+//   package   Package  @relation(fields: [packageId], references: [id])
+//   packageId String   @db.ObjectId
+//   part      Part     @relation(fields: [partId], references: [id])
+//   partId    String   @db.ObjectId
+// }
+
+// model DocsOnParts {
+//   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+//   createdAt DateTime @default(now())
+//   doc       Doc      @relation(fields: [docId], references: [id])
+//   docId     String   @db.ObjectId
+//   part      Part     @relation(fields: [partId], references: [id])
+//   partId    String   @db.ObjectId
+// }

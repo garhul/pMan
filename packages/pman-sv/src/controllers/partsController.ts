@@ -1,52 +1,41 @@
-const parts = [];
+import * as express from 'express';
+import { Part } from '../models/interfaces';
+import * as PartModel from '../models/partModel';
+import { partsSchema } from '../schemas/';
 
-interface tags {
-  name:string,
+interface PartsListQuery extends express.Request {
+  query: {
+    offset?: string;
+    limit?: string;
+  };
 }
 
-interface Packaging {
-  name:string,
+export async function get(req: express.Request, res: express.Response) {
+  res.json(await PartModel.retrieve(req.params.id));
 }
 
-interface Part {
-  id: string,
-  name: string,
-  description: string,
-  tags: tags[] | null,
-  packaging : Packaging[]| null,
-  docs: Doc[],
+export async function getList(req: PartsListQuery, res: express.Response) {
+  const offset: number = req.query.offset ? parseInt(req.query.offset) : 0;
+  const limit: number = req.query.limit ? parseInt(req.query.limit) : 100;
+  res.json(await PartModel.retrieveAll(offset, limit));
 }
 
-enum DocType {
-  pinout,
-  datasheet,
-  diagram,
-  other
+export async function remove(req: express.Request, res: express.Response) {
+  //TODO:: delete associated docs ?
+  res.json(await PartModel.del(req.body.ids));
 }
 
-interface Doc {
-  id: number,
-  name: string,
-  type: DocType,
-  path: string,
-}
-
-export function getList() :Promise <Part[]> {
-  return Promise.resolve(parts);
-}
-
-export function remove(id:number, delteAssociatedDocs = true ) {
-  //todo check for permissions
-  return null;
-
-
-}
-
-export function add(partData) {
+export async function create(req: express.Request, res: express.Response) {
   //sanitize part data
+  const data = partsSchema.validate(req.body);
+  if (data.error) return res.status(400).send(data.error.message);
 
-  //if data is correct then add it to the db
-  
-  //and return created object data
-  
+  res.status(201).json(
+    await PartModel.create({
+      name: req.body.name,
+      desc: req.body.desc,
+      tags: req.body.tags,
+      packages: req.body.packages,
+    })
+  );
 }

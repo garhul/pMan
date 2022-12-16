@@ -1,1 +1,0 @@
-import cfg from '../../config';

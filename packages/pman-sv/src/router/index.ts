@@ -1,59 +1,55 @@
-import * as express from "express";
+import * as express from 'express';
 import { join } from 'path';
+import { nextTick } from 'process';
 import cfg from '../config';
 const router = express.Router();
-import * as PartsController from '../controllers/partsController';
+import {
+  TagsController,
+  PackagesController,
+  PartsController,
+} from '../controllers/';
 
-// Public static
+import { logger } from '../services/logger';
+
+const exCatcher = (fn) => async (req, res, next) => {
+  try {
+    fn(req, res).catch((err) => next(err));
+  } catch (ex) {
+    console.log('y?');
+  }
+};
+
+const notFoundHandler = (_req: express.Request, res: express.Response) => {
+  res.status(404).send('Nope');
+};
+
 router.use('/assets', express.static(join(__dirname, 'assets')));
 
-// Parts controller
-router.get('/parts', async (req, res) => {
-  res.send(JSON.stringify(await PartsController.getList()));
-});
+/** Tag ROUTES */
+router.get('/tags', exCatcher(TagsController.getList));
+router.get('/tags/:id', exCatcher(TagsController.get));
+router.post('/tags', exCatcher(TagsController.create));
+router.delete('/tags', exCatcher(TagsController.remove));
 
-router.get('/parts/:id', async(req, res)=>{
-  res.send(JSON.stringify(await PartsController.get(req.params.id)));
-});
+/** Package routes */
+router.get('/packages', exCatcher(PackagesController.getList));
+router.get('/packages/:id', exCatcher(PackagesController.get));
+router.post('/packages', exCatcher(PackagesController.create));
+router.delete('/packages', exCatcher(PackagesController.remove));
 
-router.delete('/parts/:id', async (req, res) => {
-  // Delete part
-    await PartsController.remove(parseInt(req.params.id));
-  // Delete associated documents
-  
-  res.json('ok');
-});
+/** Part routes */
+router.get('/parts', exCatcher(PartsController.getList));
+router.get('/parts/:id', exCatcher(PartsController.get));
+router.post('/parts', exCatcher(PartsController.create));
+router.delete('/parts', exCatcher(PartsController.remove));
 
-router.post('/parts', async (req, res)=> {
-  res.json(req.body);
-});
+/** Document routes */
 
-// Documents controller
-
-router.get('/docs/', async (req,res) => {
-  
-});
-
-router.get('/docs/:id', async(req, res) => {
-  res.json(req.params);
-
-});
-
-
-
+/** Admin routes */
 
 // Misc
-router.get('/health', (_req,res) => {
-  res.json(Date.now());
-});
+router.get('/cfg', (_req, res) => res.json(cfg));
 
-router.get('/cfg', (_req, res) => {
-  res.json(cfg);  
-});
-
-router.get('*', (_req, res) => {
-  res.status(404);
-  res.send('Not here');
-});
+router.get('*', notFoundHandler);
 
 export default router;

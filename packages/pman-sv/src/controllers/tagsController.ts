@@ -1,8 +1,8 @@
 import * as express from 'express';
-import * as DocModel from '../models/docModel';
-import { docSchema } from '../schemas/index';
+import * as TagModel from '../models/tagModel';
+import { tagSchema } from '../schemas/index';
 
-interface DocListQuery extends express.Request {
+interface TagListQuery extends express.Request {
   query: {
     offset?: string;
     limit?: string;
